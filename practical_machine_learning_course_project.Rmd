@@ -3,7 +3,11 @@ title: "Practical Machine Learning Course Project - Prediction Assignment Writeu
 author: "Ing. Raúl Mascaró"
 date: "August 29, 2016"
 output:
-  html_document
+
+  html_document: 
+    fig_caption: yes
+    keep_md: yes
+    self_contained: no
 ---
 
 ##Practical Machine Learning - Prediction Assignment Writeup
