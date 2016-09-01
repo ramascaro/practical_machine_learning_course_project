@@ -1,0 +1,112 @@
+---
+title: "Practical Machine Learning Course Project - Prediction Assignment Writeup"
+author: "Ing. Raúl Mascaró"
+date: "August 29, 2016"
+output:
+  html_document
+---
+
+##Practical Machine Learning - Prediction Assignment Writeup
+
+For this assignment I analyzed the provided data to determine what activity an individual perform.
+To do this I made use of caret and randomForest, this allowed me to generate correct answers for
+each of the 20 test data cases provided in this assignment.  I made use of a seed value for 
+consistent results.
+
+
+```{r warning=FALSE, message=FALSE}
+library(Hmisc)
+library(caret)
+library(randomForest)
+library(foreach)
+library(doParallel)
+set.seed(2048)
+options(warn=-1)
+```
+
+The first step after loading libraries is loading the source data (for training and testing) from its url.
+Values with formula errors are replaced with NA values and some columns could be casted to be numeric.
+
+```{r warning=FALSE, message=FALSE}
+train.url ="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+test.url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training_data <- read.csv(train.url, na.strings=c("#DIV/0!") )
+evaluation_data <- read.csv(test.url, na.strings=c("#DIV/0!") )
+for(i in c(8:ncol(training_data)-1)) {training_data[,i] = as.numeric(as.character(training_data[,i]))}
+for(i in c(8:ncol(evaluation_data)-1)) {evaluation_data[,i] = as.numeric(as.character(evaluation_data[,i]))}
+```
+
+Columns that are not completed have been deleted. User name, timestamps and windows were also removed.  
+
+```{r warning=FALSE, message=FALSE}
+nonzv <- nearZeroVar(training_data, saveMetrics=FALSE)
+print(nonzv)
+```
+
+Due to all NZVs values are FALSE, there's no need to eliminate any covariates.
+
+Next, determine and display out feature set.
+
+```{r warning=FALSE, message=FALSE}
+feature_set <- colnames(training_data[colSums(is.na(training_data)) == 0])[-(1:7)]
+model_data <- training_data[feature_set]
+feature_set
+```
+
+Model Data is now ready to be used.
+
+```{r warning=FALSE, message=FALSE}
+idx <- createDataPartition(y=model_data$classe, p=0.75, list=FALSE )
+training <- model_data[idx,]
+testing <- model_data[-idx,]
+```
+##Random Forests
+We process in paralell 5 Random Forests with 150 Trees each one. 
+
+```{r warning=FALSE, message=FALSE}
+registerDoParallel()
+x <- training[-ncol(training)]
+y <- training$classe
+
+rf <- foreach(ntree=rep(150, 6), .combine=randomForest::combine, .packages='randomForest') %dopar% {
+randomForest(x, y, ntree=ntree)
+}
+```
+
+Provide error reports for both training and test data (Confucion Matrices).
+```{r warning=FALSE, message=FALSE}
+predictions1 <- predict(rf, newdata=training)
+confusionMatrix(predictions1,training$classe)
+
+
+predictions2 <- predict(rf, newdata=testing)
+confusionMatrix(predictions2,testing$classe)
+```
+
+##Conclusions
+
+This model have a high accuracy as we can see the confusion matrix.
+Test data had an accurancy around 99% so we could expect that nearly all of the submitted test cases will be correct as finally occured.  
+
+##TD Submission
+
+Files for submission.
+
+```{r warning=FALSE, message=FALSE}
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+
+x <- evaluation_data
+x <- x[feature_set[feature_set!='classe']]
+answers <- predict(rf, newdata=x)
+
+answers
+
+pml_write_files(answers)
+```
