@@ -76,8 +76,7 @@ library(caret)
 library(randomForest)
 library(foreach)
 library(doParallel)
-set.seed(2048)
-options(warn=-1)</code></pre>
+set.seed(2048)</code></pre>
 <p>The first step after loading libraries is loading the source data (for training and testing) from its url. Values with formula errors are replaced with NA values and some columns could be casted to be numeric.</p>
 <pre class="r"><code>train.url =&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;
 test.url = &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;
@@ -86,12 +85,6 @@ evaluation_data &lt;- read.csv(test.url, na.strings=c(&quot;#DIV/0!&quot;) )
 for(i in c(8:ncol(training_data)-1)) {training_data[,i] = as.numeric(as.character(training_data[,i]))}
 for(i in c(8:ncol(evaluation_data)-1)) {evaluation_data[,i] = as.numeric(as.character(evaluation_data[,i]))}</code></pre>
 <p>Columns that are not completed have been deleted. User name, timestamps and windows were also removed.</p>
-<pre class="r"><code>nonzv &lt;- nearZeroVar(training_data, saveMetrics=FALSE)
-nonzv</code></pre>
-<pre><code>##  [1]   6  14  17  26  51  52  53  54  55  56  57  58  59  75  78  79  81
-## [18]  82  89  92 101 127 130 131 134 137 139 142 143 144 145 146 147 148
-## [35] 149 150</code></pre>
-<p>Due to all NZVs values are FALSE, there’s no need to eliminate any covariates.</p>
 <p>Next, determine and display out feature set.</p>
 <pre class="r"><code>feature_set &lt;- colnames(training_data[colSums(is.na(training_data)) == 0])[-(1:7)]
 model_data &lt;- training_data[feature_set]
@@ -169,10 +162,10 @@ confusionMatrix(predictions2,testing$classe)</code></pre>
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1395    4    0    0    0
-##          B    0  942    6    0    0
-##          C    0    3  848    9    2
-##          D    0    0    1  795    2
+##          A 1395    5    0    0    0
+##          B    0  941    6    0    0
+##          C    0    3  848    8    2
+##          D    0    0    1  796    2
 ##          E    0    0    0    0  897
 ## 
 ## Overall Statistics
@@ -188,14 +181,14 @@ confusionMatrix(predictions2,testing$classe)</code></pre>
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            1.0000   0.9926   0.9918   0.9888   0.9956
-## Specificity            0.9989   0.9985   0.9965   0.9993   1.0000
-## Pos Pred Value         0.9971   0.9937   0.9838   0.9962   1.0000
-## Neg Pred Value         1.0000   0.9982   0.9983   0.9978   0.9990
+## Sensitivity            1.0000   0.9916   0.9918   0.9900   0.9956
+## Specificity            0.9986   0.9985   0.9968   0.9993   1.0000
+## Pos Pred Value         0.9964   0.9937   0.9849   0.9962   1.0000
+## Neg Pred Value         1.0000   0.9980   0.9983   0.9981   0.9990
 ## Prevalence             0.2845   0.1935   0.1743   0.1639   0.1837
-## Detection Rate         0.2845   0.1921   0.1729   0.1621   0.1829
-## Detection Prevalence   0.2853   0.1933   0.1758   0.1627   0.1829
-## Balanced Accuracy      0.9994   0.9956   0.9942   0.9940   0.9978</code></pre>
+## Detection Rate         0.2845   0.1919   0.1729   0.1623   0.1829
+## Detection Prevalence   0.2855   0.1931   0.1756   0.1629   0.1829
+## Balanced Accuracy      0.9993   0.9950   0.9943   0.9947   0.9978</code></pre>
 </div>
 <div id="conclusions" class="section level2">
 <h2>Conclusions</h2>
