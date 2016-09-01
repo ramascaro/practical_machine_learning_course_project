@@ -38,13 +38,6 @@ for(i in c(8:ncol(evaluation_data)-1)) {evaluation_data[,i] = as.numeric(as.char
 
 Columns that are not completed have been deleted. User name, timestamps and windows were also removed.  
 
-```{r warning=FALSE, message=FALSE}
-nonzv <- nearZeroVar(training_data, saveMetrics=FALSE)
-print(nonzv)
-```
-
-Due to all NZVs values are FALSE, there's no need to eliminate any covariates.
-
 Next, determine and display out feature set.
 
 ```{r warning=FALSE, message=FALSE}
